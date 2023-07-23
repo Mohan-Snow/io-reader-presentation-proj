@@ -1,0 +1,49 @@
+package main
+
+import (
+	"fmt"
+	"io"
+	"os"
+)
+
+func main() {
+	file1, err := os.Open("./misc/test1")
+	defer file1.Close()
+	if err != nil {
+		fmt.Println(err)
+	}
+	file2, err := os.Open("./misc/test2")
+	defer file2.Close()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	reader := io.MultiReader(file1, file2)
+	//reader := bufio.NewReader(f)
+	//reader := bytes.NewReader([]byte("Some test text"))
+	info, _ := file1.Stat()
+	bufferSizeFile1 := info.Size()
+	info, _ = file2.Stat()
+	bufferSizeFile2 := info.Size()
+
+	// слайс байт для буффера, в который ридер запишет текст из файлов
+	buffer := make([]byte, bufferSizeFile1+bufferSizeFile2)
+
+	readBytes, err := reader.Read(buffer[:bufferSizeFile1])
+	readBytes, err = reader.Read(buffer[bufferSizeFile1:])
+	//os.Stdout.Write()
+
+	if err != nil {
+		fmt.Println("Reading bytes error")
+	}
+	fmt.Println(readBytes)
+	fmt.Print(string(buffer))
+
+	//r1 := strings.NewReader("first reader ")
+	//r2 := strings.NewReader("second reader ")
+	//r := io.MultiReader(r1, r2)
+
+	//if _, err := io.Copy(os.Stdout, r); err != nil {
+	//	log.Fatal(err)
+	//}
+}
